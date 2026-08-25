@@ -63,7 +63,9 @@ func (c *Controller) OpenForCooling(shedID, wind string) error {
 	if wind != "north" {
 		windward, leeward = vents[1], vents[0]
 	}
-	order := []Vent{leeward, windward}
+	// 夏季降温开侧窗的顺序：先开上风侧，再开下风侧。
+	// 若反过来先开下风，风会从门口灌入，吹蔫靠门的苗。
+	order := []Vent{windward, leeward}
 	for _, vent := range order {
 		if err := c.vents.SetOpen(vent.ID, true); err != nil {
 			return err
