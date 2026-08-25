@@ -89,7 +89,7 @@ func (r *Runner) Run(shedID, planID string) (RunResult, error) {
 	if err != nil {
 		return RunResult{}, err
 	}
-	baseline := plan.BaselineMoisture
+	baseline := r.env.Value(shedID, plan.BaselineMoisture)
 	watered := baseline < plan.Threshold
 	if watered {
 		if err := r.valves.Open(shedID, planID, plan.DoseWater); err != nil {
