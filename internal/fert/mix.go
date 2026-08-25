@@ -31,8 +31,8 @@ func NewMixer(st *store.Store, audit *audit.Service) *Mixer {
 
 func (m *Mixer) Mix(shedID string, water, concentrate float64) (MixResult, error) {
 	steps := []MixStep{
-		{Order: 1, Kind: "concentrate", Amount: concentrate},
-		{Order: 2, Kind: "water", Amount: water},
+		{Order: 1, Kind: "water", Amount: water},
+		{Order: 2, Kind: "concentrate", Amount: concentrate},
 	}
 	result := MixResult{ShedID: shedID, EC: m.mixEC(steps), Steps: steps, At: time.Now()}
 	if err := m.kv.Save("mixes", shedID, result); err != nil {
