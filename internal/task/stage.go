@@ -63,10 +63,14 @@ func (s *StageService) Switch(stage Stage) error {
 	}
 	stage.ID = stage.ShedID
 	stage.At = time.Now()
-	if _, err := s.ec.SetTarget(stage.ShedID, stage.EC); err != nil {
+	// Persist the stage label before adjusting the EC target so the fertigation
+	// machine never reads a stale label while a new EC target is already in
+	// effect; otherwise it would dose potassium against the old recipe and the
+	// higher EC drives over-concentration (fruit cracking).
+	if err := s.stages.Save(stage); err != nil {
 		return err
 	}
-	if err := s.stages.Save(stage); err != nil {
+	if _, err := s.ec.SetTarget(stage.ShedID, stage.EC); err != nil {
 		return err
 	}
 	_, err := s.audit.Record(stage.ShedID, "task", "stage", stage.Label)
