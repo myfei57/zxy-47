@@ -54,11 +54,13 @@ func (p *PHController) Stabilize(shedID string, current float64) (PHResult, erro
 }
 
 func (p *PHController) Adjust(shedID string, current float64, ecCorrect func(string) error) (PHResult, error) {
-	if err := ecCorrect(shedID); err != nil {
-		return PHResult{}, err
-	}
+	// 先稳定 pH 再校正 EC：在酸碱尚未稳定时校正 EC 会让酸碱互相冲突，
+	// pH 会被 EC 调整带偏（如从 6.2 冲到 7.8），因此必须先稳定 pH。
 	result, err := p.Stabilize(shedID, current)
 	if err != nil {
+		return PHResult{}, err
+	}
+	if err := ecCorrect(shedID); err != nil {
 		return PHResult{}, err
 	}
 	return result, nil
