@@ -36,13 +36,13 @@ func NewController(st *store.Store, sun *env.SunlightStore, sampler *env.Sampler
 
 func (c *Controller) Retract(shedID, zoneID string) error {
 	reading := c.sampler.Value(shedID, env.TypeSunlight, 0)
+	if err := c.sun.Record(shedID, reading); err != nil {
+		return err
+	}
 	if err := c.states.Save(State{ShedID: shedID, ZoneID: zoneID, Position: PositionRetracted, At: time.Now()}); err != nil {
 		return err
 	}
 	if err := c.syncLamp(shedID, zoneID); err != nil {
-		return err
-	}
-	if err := c.sun.Record(shedID, reading); err != nil {
 		return err
 	}
 	_, err := c.audit.Record(shedID, "curtain", "retract", zoneID)
